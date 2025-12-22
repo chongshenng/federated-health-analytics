@@ -2,11 +2,10 @@
 
 import warnings
 
-import numpy as np
 from flwr.app import Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
-import pandas as pd
-from sqlalchemy import create_engine
+
+from fed_analytics_app.task import query_database
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -15,33 +14,32 @@ app = ClientApp()
 
 
 @app.query()
-def query(msg: Message, context: Context):
+def query(msg: Message, context: Context) -> Message:
     """Query PostgreSQL database and report aggregated results to `ServerApp`."""
 
     # Get database connection details from node config
-    db_host = context.node_config.get("db-host", "localhost")
-    db_port = context.node_config.get("db-port", 5432)
-    db_name = context.node_config.get("db-name", "omop")
-    db_user = context.node_config.get("db-user", "omop")
-    db_password = context.node_config.get("db-password", "omop")
-    table_name = context.node_config.get("table-name", "person_measurements")
+    db_host: str = context.node_config.get("db-host", "localhost")
+    db_port: int = context.node_config.get("db-port", 5432)
+    db_name: str = context.node_config.get("db-name", "omop")
+    db_user: str = context.node_config.get("db-user", "omop")
+    db_password: str = context.node_config.get("db-password", "omop")
+    table_name: str = context.node_config.get("table-name", "person_measurements")
 
-    # Create database connection
-    engine = create_engine(
-        f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    selected_features: list[str] = msg.content["config"]["selected_features"]
+    feature_aggregation: list[str] = msg.content["config"]["feature_aggregation"]
+
+    # Query database
+    df = query_database(
+        db_host=db_host,
+        db_port=db_port,
+        db_name=db_name,
+        db_user=db_user,
+        db_password=db_password,
+        table_name=table_name,
+        selected_features=selected_features,
     )
 
-    selected_features = msg.content["config"]["selected_features"]
-    feature_aggregation = msg.content["config"]["feature_aggregation"]
-
-    # Build query to select only the requested features
-    columns = ", ".join(selected_features)
-    query_str = f"SELECT {columns} FROM {table_name}"
-
-    # Execute query and load into DataFrame
-    df = pd.read_sql(query_str, engine)
-    engine.dispose()
-
+    # Compute aggregation metrics
     metrics = {}
     for feature in selected_features:
         if feature not in df.columns:
