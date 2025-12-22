@@ -6,6 +6,7 @@ import numpy as np
 from flwr.app import Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 import pandas as pd
+from sqlalchemy import create_engine
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -15,14 +16,31 @@ app = ClientApp()
 
 @app.query()
 def query(msg: Message, context: Context):
-    """Construct histogram of local dataset and report to `ServerApp`."""
+    """Query PostgreSQL database and report aggregated results to `ServerApp`."""
 
-    dataset_path = context.node_config["dataset-path"]
+    # Get database connection details from node config
+    db_host = context.node_config.get("db-host", "localhost")
+    db_port = context.node_config.get("db-port", 5432)
+    db_name = context.node_config.get("db-name", "omop")
+    db_user = context.node_config.get("db-user", "omop")
+    db_password = context.node_config.get("db-password", "omop")
+    table_name = context.node_config.get("table-name", "person_measurements")
 
-    df = pd.read_csv(dataset_path)
+    # Create database connection
+    engine = create_engine(
+        f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    )
 
     selected_features = msg.content["config"]["selected_features"]
     feature_aggregation = msg.content["config"]["feature_aggregation"]
+
+    # Build query to select only the requested features
+    columns = ", ".join(selected_features)
+    query_str = f"SELECT {columns} FROM {table_name}"
+
+    # Execute query and load into DataFrame
+    df = pd.read_sql(query_str, engine)
+    engine.dispose()
 
     metrics = {}
     for feature in selected_features:

@@ -11,8 +11,10 @@ authors = [
     { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
 dependencies = [
-    "flwr>=1.23.0",
-    "pandas==2.2.3",
+    "flwr>=1.24.0",
+    "pandas==2.3.3",
+    "SQLAlchemy==2.0.44",
+    "psycopg[binary]==3.2.13",
 ]
 
 [tool.hatch.build.targets.wheel]
