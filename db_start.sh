@@ -10,6 +10,7 @@ BASE_PORT=5433
   
   for i in $(seq 1 "$N"); do
     PORT=$((BASE_PORT + i - 1))
+    # Set a seed for each of the database for producing different random data
     SEED=$(echo "scale=2; $i / 100" | bc)
     cat <<EOF
   postgres_$i:
