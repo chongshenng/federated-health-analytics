@@ -25,3 +25,12 @@ federated-analytics
 ├── pyproject.toml      # Project metadata like dependencies and configs
 └── README.md
 ```
+
+### Install dependencies and project
+
+Install the dependencies defined in `pyproject.toml` as well as the `federated-analytics` package.
+
+```shell
+# From a new python environment, run:
+pip install -e .
+```

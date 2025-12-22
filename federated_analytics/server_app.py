@@ -1,11 +1,11 @@
-"""fed_analytics_app: A Flower / Federated Analytics app."""
+"""federated_analytics: A Flower / Federated Analytics app."""
 
 import json
 import random
 import time
 from logging import INFO
 
-from fed_analytics_app.task import aggregate_features
+from federated_analytics.task import aggregate_features
 from flwr.app import ConfigRecord, Context, Message, MessageType, RecordDict
 from flwr.common.logger import log
 from flwr.serverapp import Grid, ServerApp

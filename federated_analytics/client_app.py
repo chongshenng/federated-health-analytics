@@ -1,8 +1,8 @@
-"""fed_analytics_app: A Flower / Federated Analytics app."""
+"""federated_analytics: A Flower / Federated Analytics app."""
 
 import warnings
 
-from fed_analytics_app.task import query_database
+from federated_analytics.task import query_database
 from flwr.app import Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
