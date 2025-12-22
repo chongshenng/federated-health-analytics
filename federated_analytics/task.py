@@ -1,4 +1,4 @@
-"""fed_analytics_app: A Flower / Federated Analytics app."""
+"""federated_analytics: A Flower / Federated Analytics app."""
 
 from collections.abc import Iterable
 
